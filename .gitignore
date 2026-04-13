@@ -4,3 +4,8 @@
 *.ptx
 *.cubin
 *.fatbin
+
+/bin
+/build
+
+/.vscode
