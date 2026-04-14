@@ -11,7 +11,8 @@ set(CMAKE_CUDA_SEPARABLE_COMPILATION ON)
 add_executable(spmv
     src/main.cpp
     src/csr_matrix.cpp
-    src/spmv.cu
+    src/dense_vector.cpp
+    src/spmv.cpp
 )
 
 target_include_directories(spmv PRIVATE include)
