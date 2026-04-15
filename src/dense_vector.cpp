@@ -2,6 +2,8 @@
 
 DenseVector::DenseVector(int size, dtype value) : values(size, value) {}
 
+DenseVector::DenseVector(std::initializer_list<dtype> list) : values(list) {}
+
 int DenseVector::size() const {
     return this->values.size();
 }
@@ -16,7 +18,7 @@ const dtype& DenseVector::operator[](int idx) const {
 
 DenseVector& DenseVector::operator+=(const DenseVector& rhs) {
     for (int i = 0; i < this->size(); ++i) {
-        (*this)[i] += (*this)[i];
+        (*this)[i] += rhs[i];
     }
 
     return *this;

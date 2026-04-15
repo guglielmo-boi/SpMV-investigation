@@ -13,6 +13,7 @@ class DenseVector
 public:
     DenseVector() = default;
     DenseVector(int size, dtype value = 0.0);
+    DenseVector(std::initializer_list<dtype> list);
 
     int size() const;
     dtype& operator[](int idx);

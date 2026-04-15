@@ -15,12 +15,11 @@ public:
     CsrMatrix() = delete;
     CsrMatrix(const std::string& file_path);
 
-    int get_row_nnz_count(int row) const;
     bool is_close(const CsrMatrix& other, dtype epsilon = 1e-6) const;
 
 private:
     int rows;
-    int columns;
+    int cols;
     int nnz;
 
     std::vector<int> row_ptr;
