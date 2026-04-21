@@ -12,10 +12,15 @@ class DenseVector
 
 public:
     DenseVector() = default;
-    DenseVector(int size, dtype value = 0.0);
-    DenseVector(std::initializer_list<dtype> list);
+    explicit DenseVector(int size, dtype value = 0.0);
+    explicit DenseVector(std::initializer_list<dtype> list);
 
     int size() const;
+    dtype* data();
+    const dtype* data() const;
+    dtype* copy_to_device() const;
+    void copy_from_device(dtype* d_values);
+
     dtype& operator[](int idx);
     const dtype& operator[](int idx) const; 
     DenseVector& operator+=(const DenseVector& rhs);

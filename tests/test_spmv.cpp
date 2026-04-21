@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
 #include "csr_matrix.hpp"
-#include "spmv.hpp"
+#include "spmv_cpu.hpp"
 
 TEST(SpMVTests, CsrMatrixTest)
 {
@@ -36,7 +36,7 @@ TEST(SpMVTests, SpMVTest)
     dtype alpha = 1.0;
     dtype beta = 2.0;
 
-    spmv(y, x, A, alpha, beta);
+    spmv_cpu(y, x, A, alpha, beta);
 
     EXPECT_DOUBLE_EQ(y[0], 9.0);
     EXPECT_DOUBLE_EQ(y[1], 8.0);

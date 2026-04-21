@@ -1,11 +1,32 @@
 #include "dense_vector.hpp"
 
+#include <cuda_runtime.h>
+
 DenseVector::DenseVector(int size, dtype value) : values(size, value) {}
 
 DenseVector::DenseVector(std::initializer_list<dtype> list) : values(list) {}
 
 int DenseVector::size() const {
     return this->values.size();
+}
+
+dtype* DenseVector::data() {
+    return this->values.data();
+}
+
+const dtype* DenseVector::data() const {
+    return this->values.data();
+}
+
+dtype* DenseVector::copy_to_device() const {
+    dtype* d_values;
+    cudaMalloc(&d_values, this->size() * sizeof(dtype));
+    cudaMemcpy(d_values, this->values.data(), this->size() * sizeof(dtype), cudaMemcpyHostToDevice);
+    return d_values;
+}
+
+void DenseVector::copy_from_device(dtype* d_values) {
+    cudaMemcpy(this->values.data(), d_values, this->size() * sizeof(dtype), cudaMemcpyDeviceToHost);
 }
 
 dtype& DenseVector::operator[](int idx) {

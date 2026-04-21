@@ -12,10 +12,28 @@ class CsrMatrix
     friend DenseVector operator*(const CsrMatrix& csr_matrix, const DenseVector& dense_vector);
 
 public:
+    struct DeviceView 
+    {
+        explicit DeviceView(const CsrMatrix& matrix);
+
+        int rows;
+        int cols;
+        int nnz;
+
+        int* d_row_ptr;
+        int* d_col_index;
+        dtype* d_values;
+    };
+
     CsrMatrix() = delete;
-    CsrMatrix(const std::string& file_path);
+    explicit CsrMatrix(const std::string& file_path);
 
     bool is_close(const CsrMatrix& other, dtype epsilon = 1e-6) const;
+
+    const int* row_ptr_data() const;
+    const int* col_index_data() const;
+    const dtype* values_data() const;
+    DeviceView copy_to_device() const;
 
 private:
     int rows;

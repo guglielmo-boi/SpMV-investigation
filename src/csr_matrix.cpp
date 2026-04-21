@@ -4,6 +4,10 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cuda_runtime.h>
+
+CsrMatrix::DeviceView::DeviceView(const CsrMatrix& matrix) :
+    rows(rows), cols(cols), nnz(nnz) {}
 
 CsrMatrix::CsrMatrix(const std::string& file_path) {
     auto mtx_matrix = MtxParser::parseMtxFile(file_path);
@@ -47,6 +51,32 @@ bool CsrMatrix::is_close(const CsrMatrix& other, dtype epsilon) const {
     }
 
     return true;
+}
+
+const int* CsrMatrix::row_ptr_data() const { 
+    return row_ptr.data();
+}
+
+const int* CsrMatrix::col_index_data() const {
+    return col_index.data();
+}
+
+const dtype* CsrMatrix::values_data() const { 
+    return values.data(); 
+}
+
+CsrMatrix::DeviceView CsrMatrix::copy_to_device() const {
+    DeviceView view(*this);
+
+    cudaMalloc(&view.d_row_ptr, (this->rows + 1) * sizeof(int));
+    cudaMalloc(&view.d_col_index, this->nnz * sizeof(int));
+    cudaMalloc(&view.d_values, this->nnz * sizeof(dtype));
+
+    cudaMemcpy(view.d_row_ptr, this->row_ptr.data(), (this->rows + 1) * sizeof(int), cudaMemcpyHostToDevice);
+    cudaMemcpy(view.d_col_index, this->col_index.data(), this->nnz * sizeof(int), cudaMemcpyHostToDevice);
+    cudaMemcpy(view.d_values, this->values.data(), this->nnz * sizeof(dtype), cudaMemcpyHostToDevice);
+
+    return view;
 }
 
 DenseVector operator*(const CsrMatrix& csr_matrix, const DenseVector& dense_vector) {

@@ -1,21 +1,35 @@
 cmake_minimum_required(VERSION 3.26)
 
-project(spmv)
+project(spmv LANGUAGES CXX CUDA)
 
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CUDA_STANDARD 17)
 
-# -------------------------
-# Executable
-# -------------------------
-add_executable(spmv
-    src/main.cpp
+find_package(CUDAToolkit REQUIRED)
+
+add_library(spmv_lib
     src/csr_matrix.cpp
     src/dense_vector.cpp
     src/mtx_parser.cpp
-    src/spmv.cpp
+    src/spmv_cpu.cpp
+    src/spmv_csr_vector.cu
 )
 
-target_include_directories(spmv PRIVATE include)
+target_include_directories(spmv_lib PUBLIC include)
+
+target_link_libraries(spmv_lib PUBLIC CUDA::cudart)
+
+# Optional but recommended for CUDA multi-file
+set_target_properties(spmv_lib PROPERTIES
+    CUDA_SEPARABLE_COMPILATION ON
+)
+
+# -------------------------
+# Main executable
+# -------------------------
+add_executable(spmv src/main.cpp)
+
+target_link_libraries(spmv PRIVATE spmv_lib)
 
 set_target_properties(spmv PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin
@@ -30,14 +44,13 @@ enable_testing()
 
 add_executable(spmv_tests
     tests/test_spmv.cpp
-    src/csr_matrix.cpp
-    src/dense_vector.cpp
-    src/mtx_parser.cpp
-    src/spmv.cpp
+)
+
+target_link_libraries(spmv_tests PRIVATE
+    spmv_lib
+    gtest_main
 )
 
 target_include_directories(spmv_tests PRIVATE include)
-
-target_link_libraries(spmv_tests PRIVATE gtest_main)
 
 add_test(NAME SpMVTests COMMAND spmv_tests)
