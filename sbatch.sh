@@ -7,10 +7,10 @@
 #SBATCH --cpus-per-task=1
 #SBATCH --time=00:05:00
 
-#SBATCH --job-name=test
-#SBATCH --output=test-%j.out
-#SBATCH --error=test-%j.err
+#SBATCH --job-name=spmv-test
+#SBATCH --output=spmv-%j.out
+#SBATCH --error=spmv-%j.err
 
-module load CUDA/12.5.0
+module load CUDA/12.1.1
 
-./helloCUDA
+./bin/spmv

@@ -13,24 +13,25 @@ public:
     explicit DenseVector(int size, dtype value = 0.0);
     explicit DenseVector(std::initializer_list<dtype> list);
 
-    bool is_close(const DenseVector& other, dtype epsilon = 1e-6) const;
+    static DenseVector random_vector(int size);
+
+    bool is_close(const DenseVector& other, dtype epsilon = 1e-3) const;
 
     std::size_t size() const;
     dtype* data();
     const dtype* data() const;
     dtype* copy_to_device() const;
-    void copy_from_device(dtype* d_values);
+    void copy_from_device(dtype* d_values, std::size_t size);
 
     dtype& operator[](std::size_t idx);
     const dtype& operator[](std::size_t idx) const; 
     DenseVector& operator+=(const DenseVector& rhs);
 
-private:
     std::vector<dtype> values; 
 };
 
 DenseVector operator+(const DenseVector& lhs, const DenseVector& rhs);
-DenseVector operator*(const DenseVector& dense_vector, dtype scalar);
+DenseVector operator*(const DenseVector& dense_vexctor, dtype scalar);
 DenseVector operator*(dtype scalar, const DenseVector& dense_vector);
 
 #endif

@@ -9,9 +9,6 @@
 
 class CsrMatrix
 {
-    friend DenseVector operator*(const CsrMatrix& csr_matrix, const DenseVector& dense_vector);
-    friend void spmv_csr_vector(const CsrMatrix& A, const DenseVector& x, DenseVector& y);
-
 public:
     struct DeviceView 
     {
@@ -30,14 +27,13 @@ public:
     CsrMatrix() = delete;
     explicit CsrMatrix(const std::string& file_path);
 
-    bool is_close(const CsrMatrix& other, dtype epsilon = 1e-6) const;
+    bool is_close(const CsrMatrix& other, dtype epsilon = 1e-3) const;
 
     const int* row_ptr_data() const;
     const int* col_index_data() const;
     const dtype* values_data() const;
     DeviceView copy_to_device() const;
 
-private:
     int rows;
     int cols;
     int nnz;

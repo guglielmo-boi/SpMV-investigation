@@ -2,10 +2,24 @@
 
 #include <cmath>
 #include <cuda_runtime.h>
+#include <random>
 
 DenseVector::DenseVector(int size, dtype value) : values(size, value) {}
 
 DenseVector::DenseVector(std::initializer_list<dtype> list) : values(list) {}
+
+DenseVector DenseVector::random_vector(int size) {
+    DenseVector ret(size);
+
+    static std::mt19937 gen(std::random_device{}());
+    std::uniform_real_distribution<dtype> dist(0.0, 1.0);
+
+    for (int i = 0; i < size; ++i) {
+        ret[i] = dist(gen);
+    }
+
+    return ret;
+}
 
 bool DenseVector::is_close(const DenseVector& other, dtype epsilon) const {
     if (this->size() != other.size()) {
@@ -13,7 +27,7 @@ bool DenseVector::is_close(const DenseVector& other, dtype epsilon) const {
     }
 
     for (int i = 0; i < this->size(); ++i) {
-        if (abs(this->values[i] - other.values[i]) > epsilon) {
+        if (std::abs(this->values[i] - other.values[i]) > epsilon) {
             return false;
         }
     }
@@ -40,8 +54,9 @@ dtype* DenseVector::copy_to_device() const {
     return d_values;
 }
 
-void DenseVector::copy_from_device(dtype* d_values) {
-    cudaMemcpy(this->values.data(), d_values, this->size() * sizeof(dtype), cudaMemcpyDeviceToHost);
+void DenseVector::copy_from_device(dtype* d_values, std::size_t size) {
+    this->values.resize(size);
+    cudaMemcpy(this->values.data(), d_values, size * sizeof(dtype), cudaMemcpyDeviceToHost);
 }
 
 dtype& DenseVector::operator[](std::size_t idx) {

@@ -1,6 +1,7 @@
 #include "spmv_csr_vector.hpp"
 
 #include <cuda_runtime.h>
+#include <iostream>
 
 #define WARP_SIZE 32
 
@@ -62,16 +63,11 @@ void spmv_csr_vector(const CsrMatrix& A, const DenseVector& x, DenseVector& y) {
 
     int blocks = (A.rows + warps_per_block - 1) / warps_per_block;
 
-    csr_vector_kernel<<<blocks, threads>>>(
-        A.rows,
-        view.d_row_ptr,
-        view.d_col_index,
-        view.d_values,
-        d_x,
-        d_y
-    );
+    csr_vector_kernel<<<blocks, threads>>>(A.rows, view.d_row_ptr, view.d_col_index, view.d_values, d_x, d_y);
 
-    y.copy_from_device(d_y);
+    cudaDeviceSynchronize();
+
+    y.copy_from_device(d_y, A.rows);
 
     cudaFree(d_x);
     cudaFree(d_y);

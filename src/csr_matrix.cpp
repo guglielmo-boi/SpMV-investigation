@@ -20,20 +20,20 @@ CsrMatrix::CsrMatrix(const std::string& file_path) {
 
     this->rows = mtx_matrix.rows;
     this->cols = mtx_matrix.cols;
-    this->nnz = mtx_matrix.cols;
+    this->nnz = mtx_matrix.nnz;
 
     this->row_ptr.resize(mtx_matrix.rows + 1, 0);
     this->col_index.resize(mtx_matrix.nnz, 0);
     this->values.resize(mtx_matrix.nnz, 0.0);
-
-    std::sort(mtx_matrix.elements.begin(), mtx_matrix.elements.end());
     
     int counter = 0;
 
-    for (const auto& e : mtx_matrix.elements) {
-        this->row_ptr[e.row] += 1;
-        this->col_index[counter] = e.col - 1;
-        this->values[counter++] = e.value;
+    for (const auto& [row, col_value] : mtx_matrix.elements) {
+        for (const auto& [col, value] : col_value) {
+            this->row_ptr[row] += 1;
+            this->col_index[counter] = col - 1;
+            this->values[counter++] = value;
+        }
     }
 
     for (int r = 1; r <= this->rows; ++r) {
@@ -51,7 +51,7 @@ bool CsrMatrix::is_close(const CsrMatrix& other, dtype epsilon) const {
     }
 
     for (int i = 0; i < this->nnz; ++i) {
-        if (this->col_index[i] != other.col_index[i] || abs(this->values[i] - other.values[i]) > epsilon) {
+        if (this->col_index[i] != other.col_index[i] || std::abs(this->values[i] - other.values[i]) > epsilon) {
             return false;
         }
     }
