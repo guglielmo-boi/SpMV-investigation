@@ -4,6 +4,6 @@
 #include "dense_vector.hpp"
 #include "csr_matrix.hpp"
 
-void spmv_cpu(DenseVector& y, const DenseVector& x, const CsrMatrix& A, dtype alpha, dtype beta);
+void spmv_cpu(const CsrMatrix& A, const DenseVector& x, DenseVector& y);
 
 #endif

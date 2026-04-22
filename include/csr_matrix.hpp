@@ -10,11 +10,13 @@
 class CsrMatrix
 {
     friend DenseVector operator*(const CsrMatrix& csr_matrix, const DenseVector& dense_vector);
+    friend void spmv_csr_vector(const CsrMatrix& A, const DenseVector& x, DenseVector& y);
 
 public:
     struct DeviceView 
     {
         explicit DeviceView(const CsrMatrix& matrix);
+        ~DeviceView();
 
         int rows;
         int cols;

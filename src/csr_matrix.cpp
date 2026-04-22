@@ -9,6 +9,12 @@
 CsrMatrix::DeviceView::DeviceView(const CsrMatrix& matrix) :
     rows(rows), cols(cols), nnz(nnz) {}
 
+CsrMatrix::DeviceView::~DeviceView() {
+    cudaFree(this->d_row_ptr);
+    cudaFree(this->d_col_index);
+    cudaFree(this->d_values);
+}
+
 CsrMatrix::CsrMatrix(const std::string& file_path) {
     auto mtx_matrix = MtxParser::parseMtxFile(file_path);
 

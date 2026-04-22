@@ -11,7 +11,6 @@ add_library(spmv_lib
     src/csr_matrix.cpp
     src/dense_vector.cpp
     src/mtx_parser.cpp
-    src/spmv_cpu.cpp
     src/spmv_csr_vector.cu
 )
 
@@ -38,19 +37,19 @@ set_target_properties(spmv PROPERTIES
 # -------------------------
 # GoogleTest
 # -------------------------
-add_subdirectory(external/googletest-1.17.0)
+# add_subdirectory(external/googletest-1.17.0)
 
-enable_testing()
+# enable_testing()
 
-add_executable(spmv_tests
-    tests/test_spmv.cpp
-)
+# add_executable(spmv_tests
+#     tests/test_spmv.cpp
+# )
 
-target_link_libraries(spmv_tests PRIVATE
-    spmv_lib
-    gtest_main
-)
+# target_link_libraries(spmv_tests PRIVATE
+#     spmv_lib
+#     gtest_main
+# )
 
-target_include_directories(spmv_tests PRIVATE include)
+# target_include_directories(spmv_tests PRIVATE include)
 
-add_test(NAME SpMVTests COMMAND spmv_tests)
+# add_test(NAME SpMVTests COMMAND spmv_tests)

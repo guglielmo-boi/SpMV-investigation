@@ -1,12 +1,27 @@
 #include "dense_vector.hpp"
 
+#include <cmath>
 #include <cuda_runtime.h>
 
 DenseVector::DenseVector(int size, dtype value) : values(size, value) {}
 
 DenseVector::DenseVector(std::initializer_list<dtype> list) : values(list) {}
 
-int DenseVector::size() const {
+bool DenseVector::is_close(const DenseVector& other, dtype epsilon) const {
+    if (this->size() != other.size()) {
+        return false;
+    }
+
+    for (int i = 0; i < this->size(); ++i) {
+        if (abs(this->values[i] - other.values[i]) > epsilon) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+std::size_t DenseVector::size() const {
     return this->values.size();
 }
 
@@ -29,11 +44,11 @@ void DenseVector::copy_from_device(dtype* d_values) {
     cudaMemcpy(this->values.data(), d_values, this->size() * sizeof(dtype), cudaMemcpyDeviceToHost);
 }
 
-dtype& DenseVector::operator[](int idx) {
+dtype& DenseVector::operator[](std::size_t idx) {
     return this->values[idx];
 }
 
-const dtype& DenseVector::operator[](int idx) const {
+const dtype& DenseVector::operator[](std::size_t idx) const {
     return this->values[idx];
 }
 
@@ -43,14 +58,6 @@ DenseVector& DenseVector::operator+=(const DenseVector& rhs) {
     }
 
     return *this;
-}
-
-bool operator==(const DenseVector& lhs, const DenseVector& rhs) {
-    return lhs.values == rhs.values;
-}
-
-bool operator!=(const DenseVector& lhs, const DenseVector& rhs) {
-    return !(lhs == rhs);
 }
 
 DenseVector operator+(const DenseVector& lhs, const DenseVector& rhs) {

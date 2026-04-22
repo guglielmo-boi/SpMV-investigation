@@ -5,31 +5,21 @@
 
 #include <vector>
 #include <string>
+#include <map>
 
 class MtxParser
 {
 public:
-    struct MtxElement
-    {
-        MtxElement(int row, int col, dtype value);
-
-        int row;
-        int col;
-        dtype value;
-    };
-
     struct MtxMatrix
     {
         int rows;
         int cols;
         int nnz;
 
-        std::vector<MtxParser::MtxElement> elements;
+        std::map<int, std::map<int, dtype>> elements; // [row, [col, value]]
     };
     
     static MtxParser::MtxMatrix parseMtxFile(const std::string& file_path);
 };
-
-bool operator<(const MtxParser::MtxElement& lhs, const MtxParser::MtxElement& rhs);
 
 #endif
