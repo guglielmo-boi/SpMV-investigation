@@ -1,6 +1,7 @@
 #include "csr_matrix.hpp"
 #include "dense_vector.hpp"
 #include "spmv_csr_vector.hpp"
+#include "spmv_csr_stream.hpp"
 
 #include <iostream>
 #include <filesystem>
@@ -27,12 +28,13 @@ int main() {
 
         DenseVector x = DenseVector::random_vector(A.rows);
         DenseVector y_cpu = A * x;
-        DenseVector y_gpu(A.rows);
-        spmv_csr_vector(A, x, y_gpu);
+        
+        DenseVector y_csr_vector(A.rows);
+        spmv_csr_stream(A, x, y_csr_vector);
 
-        bool ok = y_cpu.is_close(y_gpu);
+        bool ok_csr_vector = y_cpu.is_close(y_csr_vector);
 
-        if (ok) {
+        if (ok_csr_vector) {
             std::cout << "  OK\n";
             passed += 1;
         } else {

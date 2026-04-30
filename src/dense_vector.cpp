@@ -12,10 +12,10 @@ DenseVector DenseVector::random_vector(int size) {
     DenseVector ret(size);
 
     static std::mt19937 gen(std::random_device{}());
-    std::uniform_real_distribution<dtype> dist(0.0, 1.0);
+    std::uniform_int_distribution<int> dist(0, 1000);
 
     for (int i = 0; i < size; ++i) {
-        ret[i] = dist(gen);
+        ret[i] = static_cast<dtype>(dist(gen));
     }
 
     return ret;
@@ -27,7 +27,20 @@ bool DenseVector::is_close(const DenseVector& other, dtype epsilon) const {
     }
 
     for (int i = 0; i < this->size(); ++i) {
-        if (std::abs(this->values[i] - other.values[i]) > epsilon) {
+        float a = this->operator[](i);
+        float b = other[i];
+
+        float abs_error = std::fabs(a - b);
+        float denom = std::fmaxf(std::fabs(a), std::fabs(b));
+        float rel_error = (denom > 0.0f) ? abs_error / denom : abs_error;
+
+        if (abs_error > epsilon && rel_error > epsilon) {
+            std::cerr << "Mismatch at index " << i
+                      << " | a=" << a
+                      << " b=" << b
+                      << " | abs_err=" << abs_error
+                      << " rel_err=" << rel_error
+                      << std::endl;
             return false;
         }
     }

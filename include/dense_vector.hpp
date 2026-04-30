@@ -15,7 +15,7 @@ public:
 
     static DenseVector random_vector(int size);
 
-    bool is_close(const DenseVector& other, dtype epsilon = 1e-3) const;
+    bool is_close(const DenseVector& other, dtype epsilon = EPSILON) const;
 
     std::size_t size() const;
     dtype* data();

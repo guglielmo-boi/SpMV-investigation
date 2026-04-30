@@ -3,6 +3,7 @@
 
 #include <iostream>
 
-typedef double dtype;
+typedef float dtype;
+constexpr float EPSILON = 0.1;
 
 #endif

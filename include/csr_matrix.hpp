@@ -27,8 +27,6 @@ public:
     CsrMatrix() = delete;
     explicit CsrMatrix(const std::string& file_path);
 
-    bool is_close(const CsrMatrix& other, dtype epsilon = 1e-3) const;
-
     const int* row_ptr_data() const;
     const int* col_index_data() const;
     const dtype* values_data() const;

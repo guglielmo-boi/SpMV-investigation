@@ -41,24 +41,6 @@ CsrMatrix::CsrMatrix(const std::string& file_path) {
     }
 }
 
-bool CsrMatrix::is_close(const CsrMatrix& other, dtype epsilon) const {
-    if (this->rows != other.rows || this->cols != other.cols || this->nnz != other.nnz) {
-        return false;
-    }
-
-    if (this->row_ptr != other.row_ptr) {
-        return false;
-    }
-
-    for (int i = 0; i < this->nnz; ++i) {
-        if (this->col_index[i] != other.col_index[i] || std::abs(this->values[i] - other.values[i]) > epsilon) {
-            return false;
-        }
-    }
-
-    return true;
-}
-
 const int* CsrMatrix::row_ptr_data() const { 
     return row_ptr.data();
 }

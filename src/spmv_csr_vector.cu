@@ -1,21 +1,7 @@
 #include "spmv_csr_vector.hpp"
 
-#include <cuda_runtime.h>
-#include <iostream>
+#include "spmv_common.hpp"
 
-#define WARP_SIZE 32
-
-// Warp-level reduction
-__inline__ __device__
-dtype warp_reduce_sum(dtype val) {
-    for (int offset = WARP_SIZE / 2; offset > 0; offset /= 2) {
-        val += __shfl_down_sync(0xffffffff, val, offset);
-    }
-        
-    return val;
-}
-
-// CSR-Vector kernel (1 warp = 1 row)
 __global__
 void csr_vector_kernel(
     int rows,
@@ -40,8 +26,8 @@ void csr_vector_kernel(
     dtype sum = 0;
 
     // each thread processes one part of the row
-    for (int j = row_start + lane; j < row_end; j += WARP_SIZE) {
-        sum += values[j] * x[col_idx[j]];
+    for (int i = row_start + lane; i < row_end; i += WARP_SIZE) {
+        sum += values[i] * x[col_idx[i]];
     }
 
     sum = warp_reduce_sum(sum);
@@ -61,9 +47,16 @@ void spmv_csr_vector(const CsrMatrix& A, const DenseVector& x, DenseVector& y) {
     int threads = 128;
     int warps_per_block = threads / WARP_SIZE;
 
-    int blocks = (A.rows + warps_per_block - 1) / warps_per_block;
+    int blocks = (A.rows + warps_per_block - 1) / warps_per_block; // ceiling division
 
-    csr_vector_kernel<<<blocks, threads>>>(A.rows, view.d_row_ptr, view.d_col_index, view.d_values, d_x, d_y);
+    csr_vector_kernel<<<blocks, threads>>>(
+        A.rows,
+        view.d_row_ptr,
+        view.d_col_index,
+        view.d_values,
+        d_x,
+        d_y
+    );
 
     cudaDeviceSynchronize();
 
