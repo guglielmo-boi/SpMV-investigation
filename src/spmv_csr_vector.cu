@@ -1,6 +1,6 @@
-#include "spmv_csr_vector.hpp"
+#include "spmv_csr_vector.cuh"
 
-#include "spmv_common.hpp"
+#include "spmv_common.cuh"
 
 __global__
 void csr_vector_kernel(
@@ -9,31 +9,36 @@ void csr_vector_kernel(
     const int* col_idx,
     const dtype* values,
     const dtype* x,
-    dtype* y)
+    dtype* y,
+    const int* active_rows,
+    int num_active)
 {
     int global_thread_id = blockIdx.x * blockDim.x + threadIdx.x;
-
     int warp_id = global_thread_id / WARP_SIZE;
     int lane = threadIdx.x % WARP_SIZE;
 
-    if (warp_id >= rows) {
+    if (warp_id >= num_active) {
         return;
     }
 
-    int row_start = row_ptr[warp_id];
-    int row_end = row_ptr[warp_id + 1];
+    int row = active_rows[warp_id];
+    int row_start = row_ptr[row];
+    int row_end   = row_ptr[row + 1];
 
     dtype sum = 0;
 
-    // each thread processes one part of the row
-    for (int i = row_start + lane; i < row_end; i += WARP_SIZE) {
-        sum += values[i] * x[col_idx[i]];
+    for (int j = row_start + lane; j < row_end; j += WARP_SIZE) {
+        sum += values[j] * x[col_idx[j]];
     }
 
-    sum = warp_reduce_sum(sum);
+    unsigned mask = __activemask();
+
+    for (int offset = WARP_SIZE/2; offset > 0; offset /= 2) {
+        sum += __shfl_down_sync(mask, sum, offset);
+    }
 
     if (lane == 0) {
-        y[warp_id] = sum;
+        y[row] += sum;
     }
 }
 
@@ -43,11 +48,22 @@ void spmv_csr_vector(const CsrMatrix& A, const DenseVector& x, DenseVector& y) {
 
     dtype* d_y;
     cudaMalloc(&d_y, A.rows * sizeof(dtype));
+    cudaMemset(d_y, 0, A.rows * sizeof(dtype));
 
+    std::vector<int> active_rows(A.rows);
+
+    for (int i = 0; i < A.rows; ++i) {
+        active_rows[i] = i;
+    }
+
+    int* d_active_rows;
+    cudaMalloc(&d_active_rows, A.rows * sizeof(int));
+    cudaMemcpy(d_active_rows, active_rows.data(), A.rows * sizeof(int), cudaMemcpyHostToDevice);
+
+    int num_active = A.rows;
     int threads = 128;
     int warps_per_block = threads / WARP_SIZE;
-
-    int blocks = (A.rows + warps_per_block - 1) / warps_per_block; // ceiling division
+    int blocks = (num_active + warps_per_block - 1) / warps_per_block;
 
     csr_vector_kernel<<<blocks, threads>>>(
         A.rows,
@@ -55,7 +71,9 @@ void spmv_csr_vector(const CsrMatrix& A, const DenseVector& x, DenseVector& y) {
         view.d_col_index,
         view.d_values,
         d_x,
-        d_y
+        d_y,
+        d_active_rows,
+        num_active
     );
 
     cudaDeviceSynchronize();
@@ -64,4 +82,5 @@ void spmv_csr_vector(const CsrMatrix& A, const DenseVector& x, DenseVector& y) {
 
     cudaFree(d_x);
     cudaFree(d_y);
+    cudaFree(d_active_rows);
 }

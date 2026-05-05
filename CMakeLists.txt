@@ -13,6 +13,7 @@ add_library(spmv_lib
     src/dense_vector.cpp
     src/mtx_parser.cpp
     src/spmv_common.cu
+    src/spmv_csr_adaptive.cu
     src/spmv_csr_stream.cu
     src/spmv_csr_vector.cu
 )

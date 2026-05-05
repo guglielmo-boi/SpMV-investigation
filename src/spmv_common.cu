@@ -1,4 +1,4 @@
-#include "spmv_common.hpp"
+#include "spmv_common.cuh"
 
 // Warp-level reduction
 __device__

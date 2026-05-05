@@ -32,15 +32,9 @@ bool DenseVector::is_close(const DenseVector& other, dtype epsilon) const {
 
         float abs_error = std::fabs(a - b);
         float denom = std::fmaxf(std::fabs(a), std::fabs(b));
-        float rel_error = (denom > 0.0f) ? abs_error / denom : abs_error;
+        float rel_error = (denom > 0.0) ? (abs_error / denom) : abs_error;
 
         if (abs_error > epsilon && rel_error > epsilon) {
-            std::cerr << "Mismatch at index " << i
-                      << " | a=" << a
-                      << " b=" << b
-                      << " | abs_err=" << abs_error
-                      << " rel_err=" << rel_error
-                      << std::endl;
             return false;
         }
     }

@@ -1,6 +1,6 @@
-#include "spmv_csr_stream.hpp"
+#include "spmv_csr_stream.cuh"
 
-#include "spmv_common.hpp"
+#include "spmv_common.cuh"
 
 // binary search: find row for NNZ index
 __device__
@@ -10,10 +10,12 @@ int find_row(const int* row_ptr, int rows, int idx) {
 
     while (left < right) {
         int mid = (left + right) / 2;
-        if (row_ptr[mid] <= idx)
+
+        if (row_ptr[mid] <= idx) {
             left = mid + 1;
-        else
+        } else {
             right = mid;
+        }
     }
 
     return left - 1;
@@ -27,10 +29,10 @@ void csr_stream_kernel(
     const int* col_idx,
     const dtype* values,
     const dtype* x,
-    dtype* y)
+    dtype* y,
+    const char* is_long)
 {
     int global_thread_id = blockIdx.x * blockDim.x + threadIdx.x;
-
     int warp_id = global_thread_id / WARP_SIZE;
     int lane = threadIdx.x % WARP_SIZE;
 
@@ -42,7 +44,6 @@ void csr_stream_kernel(
     }
 
     int end = min(start + chunk_size, nnz);
-
     dtype val = 0;
     int row = -1;
 
@@ -51,6 +52,11 @@ void csr_stream_kernel(
 
         val = values[i] * x[col_idx[i]];
         row = find_row(row_ptr, rows, i);
+
+        if (is_long != nullptr && is_long[row]) {
+            val = 0;
+            row = -1;
+        }
     }
 
     // segmented reduction inside warp
@@ -94,7 +100,8 @@ void spmv_csr_stream(const CsrMatrix& A, const DenseVector& x, DenseVector& y) {
         view.d_col_index,
         view.d_values,
         d_x,
-        d_y
+        d_y,
+        nullptr
     );
 
     cudaDeviceSynchronize();
