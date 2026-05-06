@@ -1,5 +1,5 @@
-#ifndef SPMV_COMMON_HPP
-#define SPMV_COMMON_HPP
+#ifndef SPMV_COMMON_CUH
+#define SPMV_COMMON_CUH
 
 #include "common.hpp"
 

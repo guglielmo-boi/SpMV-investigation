@@ -10,5 +10,6 @@
 /bin
 /build
 /data
+/log
 
 /.vscode

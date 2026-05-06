@@ -1,5 +1,6 @@
 #include "spmv_csr_vector.cuh"
 
+#include "cuda_event_chrono.cuh"
 #include "spmv_common.cuh"
 
 __global__
@@ -42,7 +43,10 @@ void csr_vector_kernel(
     }
 }
 
-void spmv_csr_vector(const CsrMatrix& A, const DenseVector& x, DenseVector& y) {
+Metrics spmv_csr_vector(const CsrMatrix& A, const DenseVector& x, DenseVector& y) {
+    Metrics metrics;
+    CudaEventChrono csr_vector_chrono;
+
     auto view = A.copy_to_device();
     dtype* d_x = x.copy_to_device();
 
@@ -65,6 +69,8 @@ void spmv_csr_vector(const CsrMatrix& A, const DenseVector& x, DenseVector& y) {
     int warps_per_block = threads / WARP_SIZE;
     int blocks = (num_active + warps_per_block - 1) / warps_per_block;
 
+    CudaEventChrono csr_vector_kernel_chrono;
+
     csr_vector_kernel<<<blocks, threads>>>(
         A.rows,
         view.d_row_ptr,
@@ -76,6 +82,8 @@ void spmv_csr_vector(const CsrMatrix& A, const DenseVector& x, DenseVector& y) {
         num_active
     );
 
+    metrics.csr_vector_kernel_execution_time = csr_vector_kernel_chrono.measure_elapsed_milliseconds();
+
     cudaDeviceSynchronize();
 
     y.copy_from_device(d_y, A.rows);
@@ -83,4 +91,9 @@ void spmv_csr_vector(const CsrMatrix& A, const DenseVector& x, DenseVector& y) {
     cudaFree(d_x);
     cudaFree(d_y);
     cudaFree(d_active_rows);
+
+    metrics.total_execution_time = csr_vector_chrono.measure_elapsed_milliseconds();
+    metrics.gflops = (A.nnz * 2 / 1e6) / metrics.total_execution_time;
+
+    return metrics;
 }

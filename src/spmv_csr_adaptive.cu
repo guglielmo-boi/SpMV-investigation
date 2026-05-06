@@ -1,10 +1,14 @@
 #include "spmv_csr_adaptive.cuh"
 
+#include "cuda_event_chrono.cuh"
 #include "spmv_common.cuh"
 #include "spmv_csr_stream.cuh"
 #include "spmv_csr_vector.cuh"
 
-void spmv_csr_adaptive(const CsrMatrix& A, const DenseVector& x, DenseVector& y) {
+Metrics spmv_csr_adaptive(const CsrMatrix& A, const DenseVector& x, DenseVector& y) {
+    Metrics metrics;
+    CudaEventChrono csr_adaptive_chrono;
+
     std::vector<int> long_rows;
     int threshold = WARP_SIZE;
 
@@ -32,7 +36,7 @@ void spmv_csr_adaptive(const CsrMatrix& A, const DenseVector& x, DenseVector& y)
     cudaMemset(d_y, 0, A.rows * sizeof(dtype));
 
     int* d_long_rows = nullptr;
-    
+
     if (num_long > 0) {
         cudaMalloc(&d_long_rows, num_long * sizeof(int));
         cudaMemcpy(d_long_rows, long_rows.data(), num_long * sizeof(int), cudaMemcpyHostToDevice);
@@ -47,6 +51,8 @@ void spmv_csr_adaptive(const CsrMatrix& A, const DenseVector& x, DenseVector& y)
         int warps_per_block = threads / WARP_SIZE;
         int blocks = (num_long + warps_per_block - 1) / warps_per_block;
 
+        CudaEventChrono csr_vector_kernel_chrono;
+
         csr_vector_kernel<<<blocks, threads>>>(
             A.rows,
             view.d_row_ptr,
@@ -57,25 +63,29 @@ void spmv_csr_adaptive(const CsrMatrix& A, const DenseVector& x, DenseVector& y)
             d_long_rows,
             num_long
         );
+
+        metrics.csr_vector_kernel_execution_time = csr_vector_kernel_chrono.measure_elapsed_milliseconds();
     }
 
-    {
-        int threads = 128;
-        int warps_per_block = threads / WARP_SIZE;
-        int total_warps = (A.nnz + WARP_SIZE - 1) / WARP_SIZE;
-        int blocks = (total_warps + warps_per_block - 1) / warps_per_block;
+    int threads = 128;
+    int warps_per_block = threads / WARP_SIZE;
+    int total_warps = (A.nnz + WARP_SIZE - 1) / WARP_SIZE;
+    int blocks = (total_warps + warps_per_block - 1) / warps_per_block;
 
-        csr_stream_kernel<<<blocks, threads>>>(
-            A.rows,
-            A.nnz,
-            view.d_row_ptr,
-            view.d_col_index,
-            view.d_values,
-            d_x,
-            d_y,
-            d_is_long
-        );
-    }
+    CudaEventChrono csr_stream_kernel_chrono;
+
+    csr_stream_kernel<<<blocks, threads>>>(
+        A.rows,
+        A.nnz,
+        view.d_row_ptr,
+        view.d_col_index,
+        view.d_values,
+        d_x,
+        d_y,
+        d_is_long
+    );
+
+    metrics.csr_stream_kernel_execution_time = csr_stream_kernel_chrono.measure_elapsed_milliseconds();
 
     cudaDeviceSynchronize();
 
@@ -88,4 +98,9 @@ void spmv_csr_adaptive(const CsrMatrix& A, const DenseVector& x, DenseVector& y)
     if (d_long_rows) {
         cudaFree(d_long_rows);
     }
+
+    metrics.total_execution_time = csr_adaptive_chrono.measure_elapsed_milliseconds();
+    metrics.gflops = (A.nnz * 2 / 1e6) / metrics.total_execution_time;
+
+    return metrics;
 }

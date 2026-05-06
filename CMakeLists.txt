@@ -10,7 +10,9 @@ find_package(CUDAToolkit REQUIRED)
 
 add_library(spmv_lib
     src/csr_matrix.cpp
+    src/cuda_event_chrono.cu
     src/dense_vector.cpp
+    src/metrics.cpp
     src/mtx_parser.cpp
     src/spmv_common.cu
     src/spmv_csr_adaptive.cu

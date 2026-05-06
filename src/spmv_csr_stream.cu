@@ -1,5 +1,6 @@
 #include "spmv_csr_stream.cuh"
 
+#include "cuda_event_chrono.cuh"
 #include "spmv_common.cuh"
 
 // binary search: find row for NNZ index
@@ -79,7 +80,10 @@ void csr_stream_kernel(
     }
 }
 
-void spmv_csr_stream(const CsrMatrix& A, const DenseVector& x, DenseVector& y) {
+Metrics spmv_csr_stream(const CsrMatrix& A, const DenseVector& x, DenseVector& y) {
+    Metrics metrics;
+    CudaEventChrono csr_stream_chrono;
+
     auto view = A.copy_to_device();
     dtype* d_x = x.copy_to_device();
 
@@ -93,6 +97,8 @@ void spmv_csr_stream(const CsrMatrix& A, const DenseVector& x, DenseVector& y) {
     int total_warps = (A.nnz + WARP_SIZE - 1) / WARP_SIZE;
     int blocks = (total_warps + warps_per_block - 1) / warps_per_block;
 
+    CudaEventChrono csr_stream_kernel_chrono;
+
     csr_stream_kernel<<<blocks, threads>>>(
         A.rows,
         A.nnz,
@@ -104,10 +110,17 @@ void spmv_csr_stream(const CsrMatrix& A, const DenseVector& x, DenseVector& y) {
         nullptr
     );
 
+    metrics.csr_stream_kernel_execution_time = csr_stream_kernel_chrono.measure_elapsed_milliseconds();
+
     cudaDeviceSynchronize();
 
     y.copy_from_device(d_y, A.rows);
 
     cudaFree(d_x);
     cudaFree(d_y);
+
+    metrics.total_execution_time = csr_stream_chrono.measure_elapsed_milliseconds();
+    metrics.gflops = (A.nnz * 2 / 1e6) / metrics.total_execution_time;
+
+    return metrics;
 }

@@ -1,10 +1,11 @@
-#ifndef SPMV_CSR_ADAPTIVE_HPP
-#define SPMV_CSR_ADAPTIVE_HPP
+#ifndef SPMV_CSR_ADAPTIVE_CUH
+#define SPMV_CSR_ADAPTIVE_CUH
 
 #include "csr_matrix.hpp"
 #include "dense_vector.hpp"
+#include "metrics.hpp"
 #include "spmv_common.cuh"
 
-void spmv_csr_adaptive(const CsrMatrix& A, const DenseVector& x, DenseVector& y);
+Metrics spmv_csr_adaptive(const CsrMatrix& A, const DenseVector& x, DenseVector& y);
 
 #endif
