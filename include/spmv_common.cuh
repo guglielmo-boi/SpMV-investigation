@@ -2,6 +2,8 @@
 #define SPMV_COMMON_CUH
 
 #include "common.hpp"
+#include "cuda_event_chrono.cuh"
+#include "metrics.hpp"
 
 #include <cuda_runtime.h>
 

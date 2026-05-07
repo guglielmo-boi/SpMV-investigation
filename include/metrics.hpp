@@ -7,9 +7,9 @@ struct Metrics
 {
     std::string matrix_id;
     float total_execution_time = 0.0;
-    float csr_stream_kernel_execution_time = 0.0;
-    float csr_vector_kernel_execution_time = 0.0;
-    float gflops = 0.0;
+    float kernel_execution_time = 0.0;
+    float total_gflops = 0.0;
+    float kernel_gflops = 0.0;
 
     static const std::string header;
 };

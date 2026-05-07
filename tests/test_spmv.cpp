@@ -5,6 +5,7 @@
 #include "spmv_csr_adaptive.cuh"
 #include "spmv_csr_vector.cuh"
 #include "spmv_csr_stream.cuh"
+#include "spmv_cusparse.cuh"
 
 #include <filesystem>
 #include <vector>
@@ -43,7 +44,7 @@ TEST_P(SpMVTest, CSRAdaptiveMatchesCPU) {
     DenseVector y_gpu(A->rows);
     spmv_csr_adaptive(*A, x, y_gpu);
 
-    EXPECT_TRUE(y_cpu.is_close(y_gpu)) << "CSR Adaptive mismatch for file: " << filename;
+    EXPECT_TRUE(y_cpu.is_close(y_gpu)) << "CSR-Adaptive mismatch for file: " << filename;
 }
 
 TEST_P(SpMVTest, CSRStreamMatchesCPU) {
@@ -51,7 +52,7 @@ TEST_P(SpMVTest, CSRStreamMatchesCPU) {
     DenseVector y_gpu(A->rows);
     spmv_csr_stream(*A, x, y_gpu);
 
-    EXPECT_TRUE(y_cpu.is_close(y_gpu)) << "CSR Stream mismatch for file: " << filename;
+    EXPECT_TRUE(y_cpu.is_close(y_gpu)) << "CSR-Stream mismatch for file: " << filename;
 }
 
 TEST_P(SpMVTest, CSRVectorMatchesCPU) {
@@ -59,7 +60,15 @@ TEST_P(SpMVTest, CSRVectorMatchesCPU) {
     DenseVector y_gpu(A->rows);
     spmv_csr_vector(*A, x, y_gpu);
 
-    EXPECT_TRUE(y_cpu.is_close(y_gpu)) << "CSR Vector mismatch for file: " << filename;
+    EXPECT_TRUE(y_cpu.is_close(y_gpu)) << "CSR-Vector mismatch for file: " << filename;
+}
+
+TEST_P(SpMVTest, cuSPARSEMatchesCPU) {
+    DenseVector y_cpu = (*A) * x;
+    DenseVector y_gpu(A->rows);
+    spmv_cusparse(*A, x, y_gpu);
+
+    EXPECT_TRUE(y_cpu.is_close(y_gpu)) << "cuSPARSE mismatch for file: " << filename;
 }
 
 INSTANTIATE_TEST_SUITE_P(

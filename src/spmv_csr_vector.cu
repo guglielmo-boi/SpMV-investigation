@@ -1,8 +1,5 @@
 #include "spmv_csr_vector.cuh"
 
-#include "cuda_event_chrono.cuh"
-#include "spmv_common.cuh"
-
 __global__
 void csr_vector_kernel(
     int rows,
@@ -82,7 +79,7 @@ Metrics spmv_csr_vector(const CsrMatrix& A, const DenseVector& x, DenseVector& y
         num_active
     );
 
-    metrics.csr_vector_kernel_execution_time = csr_vector_kernel_chrono.measure_elapsed_milliseconds();
+    metrics.kernel_execution_time = csr_vector_kernel_chrono.measure_elapsed_milliseconds();
 
     cudaDeviceSynchronize();
 
@@ -93,7 +90,8 @@ Metrics spmv_csr_vector(const CsrMatrix& A, const DenseVector& x, DenseVector& y
     cudaFree(d_active_rows);
 
     metrics.total_execution_time = csr_vector_chrono.measure_elapsed_milliseconds();
-    metrics.gflops = (A.nnz * 2 / 1e6) / metrics.total_execution_time;
+    metrics.total_gflops = (A.nnz * 2.0) / (metrics.total_execution_time * 1e6);
+    metrics.kernel_gflops = (A.nnz * 2.0) / (metrics.kernel_execution_time * 1e6);
 
     return metrics;
 }

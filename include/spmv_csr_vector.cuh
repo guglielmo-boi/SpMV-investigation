@@ -3,7 +3,6 @@
 
 #include "csr_matrix.hpp"
 #include "dense_vector.hpp"
-#include "metrics.hpp"
 #include "spmv_common.cuh"
 
 __global__ 

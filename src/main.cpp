@@ -1,6 +1,7 @@
 #include "spmv_csr_adaptive.cuh"
 #include "spmv_csr_stream.cuh"
 #include "spmv_csr_vector.cuh"
+#include "spmv_cusparse.cuh"
 
 #include <filesystem>
 #include <fstream>
@@ -43,13 +44,15 @@ int main(int argc, char* argv[]) {
     std::filesystem::path log_dir = std::filesystem::path(argv[2]) / run_id;
     std::filesystem::create_directories(log_dir);
 
-    std::ofstream adaptive_log(log_dir / "csr_adaptive.log");
-    std::ofstream stream_log(log_dir / "csr_stream.log");
-    std::ofstream vector_log(log_dir / "csr_vector.log");
+    std::ofstream csr_adaptive_log(log_dir / "csr_adaptive.log");
+    std::ofstream csr_stream_log(log_dir / "csr_stream.log");
+    std::ofstream csr_vector_log(log_dir / "csr_vector.log");
+    std::ofstream cusparse_log(log_dir / "cusparse.log");
 
-    adaptive_log << Metrics::header << std::endl;
-    stream_log << Metrics::header << std::endl;
-    vector_log << Metrics::header << std::endl;
+    csr_adaptive_log << Metrics::header << std::endl;
+    csr_stream_log << Metrics::header << std::endl;
+    csr_vector_log << Metrics::header << std::endl;
+    cusparse_log << Metrics::header << std::endl;
 
     auto matrix_files = get_matrix_files(data_dir);
 
@@ -62,21 +65,28 @@ int main(int argc, char* argv[]) {
         {
             Metrics metrics = spmv_csr_adaptive(A, x, y);
             metrics.matrix_id = matrix_path.filename().stem();
-            adaptive_log << metrics << std::endl;
+            csr_adaptive_log << metrics << std::endl;
         }
 
         // CSR-Stream
         {
             Metrics metrics = spmv_csr_stream(A, x, y);
             metrics.matrix_id = matrix_path.filename().stem();
-            stream_log << metrics << std::endl;
+            csr_stream_log << metrics << std::endl;
         }
 
         // CSR-Vector
         {
             Metrics metrics = spmv_csr_vector(A, x, y);
             metrics.matrix_id = matrix_path.filename().stem();
-            vector_log << metrics << std::endl;
+            csr_vector_log << metrics << std::endl;
+        }
+
+        // cuSPARSE
+        {
+            Metrics metrics = spmv_cusparse(A, x, y);
+            metrics.matrix_id = matrix_path.filename().stem();
+            cusparse_log << metrics << std::endl;
         }
     }
 

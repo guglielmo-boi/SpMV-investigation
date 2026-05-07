@@ -1,8 +1,5 @@
 #include "spmv_csr_stream.cuh"
 
-#include "cuda_event_chrono.cuh"
-#include "spmv_common.cuh"
-
 // binary search: find row for NNZ index
 __device__
 int find_row(const int* row_ptr, int rows, int idx) {
@@ -110,7 +107,7 @@ Metrics spmv_csr_stream(const CsrMatrix& A, const DenseVector& x, DenseVector& y
         nullptr
     );
 
-    metrics.csr_stream_kernel_execution_time = csr_stream_kernel_chrono.measure_elapsed_milliseconds();
+    metrics.kernel_execution_time = csr_stream_kernel_chrono.measure_elapsed_milliseconds();
 
     cudaDeviceSynchronize();
 
@@ -120,7 +117,8 @@ Metrics spmv_csr_stream(const CsrMatrix& A, const DenseVector& x, DenseVector& y
     cudaFree(d_y);
 
     metrics.total_execution_time = csr_stream_chrono.measure_elapsed_milliseconds();
-    metrics.gflops = (A.nnz * 2 / 1e6) / metrics.total_execution_time;
+    metrics.total_gflops = (A.nnz * 2.0) / (metrics.total_execution_time * 1e6);
+    metrics.kernel_gflops = (A.nnz * 2.0) / (metrics.kernel_execution_time * 1e6);
 
     return metrics;
 }

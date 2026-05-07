@@ -18,13 +18,13 @@ add_library(spmv_lib
     src/spmv_csr_adaptive.cu
     src/spmv_csr_stream.cu
     src/spmv_csr_vector.cu
+    src/spmv_cusparse.cu
 )
 
 target_include_directories(spmv_lib PUBLIC include)
 
-target_link_libraries(spmv_lib PUBLIC CUDA::cudart)
+target_link_libraries(spmv_lib PUBLIC CUDA::cudart CUDA::cusparse)
 
-# Optional but recommended for CUDA multi-file
 set_target_properties(spmv_lib PROPERTIES
     CUDA_SEPARABLE_COMPILATION ON
 )

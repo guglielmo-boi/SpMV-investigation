@@ -1,7 +1,5 @@
 #include "spmv_csr_adaptive.cuh"
 
-#include "cuda_event_chrono.cuh"
-#include "spmv_common.cuh"
 #include "spmv_csr_stream.cuh"
 #include "spmv_csr_vector.cuh"
 
@@ -64,7 +62,7 @@ Metrics spmv_csr_adaptive(const CsrMatrix& A, const DenseVector& x, DenseVector&
             num_long
         );
 
-        metrics.csr_vector_kernel_execution_time = csr_vector_kernel_chrono.measure_elapsed_milliseconds();
+        metrics.kernel_execution_time += csr_vector_kernel_chrono.measure_elapsed_milliseconds();
     }
 
     int threads = 128;
@@ -85,7 +83,7 @@ Metrics spmv_csr_adaptive(const CsrMatrix& A, const DenseVector& x, DenseVector&
         d_is_long
     );
 
-    metrics.csr_stream_kernel_execution_time = csr_stream_kernel_chrono.measure_elapsed_milliseconds();
+    metrics.kernel_execution_time += csr_stream_kernel_chrono.measure_elapsed_milliseconds();
 
     cudaDeviceSynchronize();
 
@@ -100,7 +98,8 @@ Metrics spmv_csr_adaptive(const CsrMatrix& A, const DenseVector& x, DenseVector&
     }
 
     metrics.total_execution_time = csr_adaptive_chrono.measure_elapsed_milliseconds();
-    metrics.gflops = (A.nnz * 2 / 1e6) / metrics.total_execution_time;
+    metrics.total_gflops = (A.nnz * 2.0) / (metrics.total_execution_time * 1e6);
+    metrics.kernel_gflops = (A.nnz * 2.0) / (metrics.kernel_execution_time * 1e6);
 
     return metrics;
 }
