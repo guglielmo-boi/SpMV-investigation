@@ -1,5 +1,6 @@
 #!/bin/bash
 #SBATCH --partition=edu-medium
+#SBATCH --nodelist=edu01
 #SBATCH --account=gpu.computing26
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
@@ -8,9 +9,10 @@
 #SBATCH --time=02:00:00
 
 #SBATCH --job-name=spmv-benchmark
-#SBATCH --output=spmv-benchmark-%j.out
-#SBATCH --error=spmv-benchmark-%j.err
+#SBATCH --array=1-10
+#SBATCH --output=spmv-benchmark-%A_%a.out
+#SBATCH --error=spmv-benchmark-%A_%a.err
 
 module load CUDA/12.1.1
 
-./bin/spmv /home/guglielmo.boi/spmv-investigation/data /home/guglielmo.boi/spmv-investigation/log 
+./bin/spmv /home/guglielmo.boi/spmv-investigation/data /home/guglielmo.boi/spmv-investigation/log

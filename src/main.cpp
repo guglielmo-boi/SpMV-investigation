@@ -16,7 +16,7 @@ std::vector<std::filesystem::path> get_matrix_files(const std::filesystem::path&
     std::vector<std::filesystem::path> files;
 
     if (!std::filesystem::exists(data_dir) || !std::filesystem::is_directory(data_dir)) {
-        std::cerr << "Input directory does not exist!" << std::endl;
+        std::cerr << "Input directory does not exist!" << '\n';
 
         return {};
     }
@@ -44,15 +44,15 @@ int main(int argc, char* argv[]) {
     std::filesystem::path log_dir = std::filesystem::path(argv[2]) / run_id;
     std::filesystem::create_directories(log_dir);
 
-    std::ofstream csr_adaptive_log(log_dir / "csr_adaptive.log");
-    std::ofstream csr_stream_log(log_dir / "csr_stream.log");
-    std::ofstream csr_vector_log(log_dir / "csr_vector.log");
-    std::ofstream cusparse_log(log_dir / "cusparse.log");
+    std::ofstream csr_adaptive_log(log_dir / "csr_adaptive.csv");
+    std::ofstream csr_stream_log(log_dir / "csr_stream.csv");
+    std::ofstream csr_vector_log(log_dir / "csr_vector.csv");
+    std::ofstream cusparse_log(log_dir / "cusparse.csv");
 
-    csr_adaptive_log << Metrics::header << std::endl;
-    csr_stream_log << Metrics::header << std::endl;
-    csr_vector_log << Metrics::header << std::endl;
-    cusparse_log << Metrics::header << std::endl;
+    csr_adaptive_log << Metrics::header << '\n';
+    csr_stream_log << Metrics::header << '\n';
+    csr_vector_log << Metrics::header << '\n';
+    cusparse_log << Metrics::header << '\n';
 
     auto matrix_files = get_matrix_files(data_dir);
 
@@ -65,28 +65,28 @@ int main(int argc, char* argv[]) {
         {
             Metrics metrics = spmv_csr_adaptive(A, x, y);
             metrics.matrix_id = matrix_path.filename().stem();
-            csr_adaptive_log << metrics << std::endl;
+            csr_adaptive_log << metrics << '\n';
         }
 
         // CSR-Stream
         {
             Metrics metrics = spmv_csr_stream(A, x, y);
             metrics.matrix_id = matrix_path.filename().stem();
-            csr_stream_log << metrics << std::endl;
+            csr_stream_log << metrics << '\n';
         }
 
         // CSR-Vector
         {
             Metrics metrics = spmv_csr_vector(A, x, y);
             metrics.matrix_id = matrix_path.filename().stem();
-            csr_vector_log << metrics << std::endl;
+            csr_vector_log << metrics << '\n';
         }
 
         // cuSPARSE
         {
             Metrics metrics = spmv_cusparse(A, x, y);
             metrics.matrix_id = matrix_path.filename().stem();
-            cusparse_log << metrics << std::endl;
+            cusparse_log << metrics << '\n';
         }
     }
 
