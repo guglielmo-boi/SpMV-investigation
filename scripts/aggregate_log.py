@@ -14,10 +14,17 @@ CSV_FILES = [
     "cusparse.csv",
 ]
 
+METRICS = [
+    "total_execution_time",
+    "kernel_execution_time",
+    "total_gflops",
+    "kernel_gflops",
+]
 
-def read_kernel_gflops(csv_path):
+
+def read_metric(csv_path, metric_name):
     """
-    Reads kernel_gflops values grouped by matrix_id from a CSV file.
+    Reads a metric grouped by matrix_id from a CSV file.
     """
     values = defaultdict(list)
 
@@ -26,9 +33,9 @@ def read_kernel_gflops(csv_path):
 
         for row in reader:
             matrix_id = row["matrix_id"]
-            kernel_gflops = float(row["kernel_gflops"])
+            metric_value = float(row[metric_name])
 
-            values[matrix_id].append(kernel_gflops)
+            values[matrix_id].append(metric_value)
 
     return values
 
@@ -63,42 +70,37 @@ def compute_statistics(samples):
     }
 
 
-def process_method(data_dir, output_dir, filename):
+def process_method(data_dir, output_dir, filename, metric_name):
     """
     Processes all CSV files with the same method name
-    across all subfolders.
+    across all subfolders for a given metric.
     """
     aggregated = defaultdict(list)
 
-    # Search all subdirectories
-    for subdir in data_dir.iterdir():
-        if not subdir.is_dir():
-            continue
+    csv_paths = list(data_dir.rglob(filename))
 
-        csv_path = subdir / filename
-
-        if not csv_path.exists():
-            print(f"Warning: missing file {csv_path}")
-            continue
-
-        method_values = read_kernel_gflops(csv_path)
+    for csv_path in csv_paths:
+        method_values = read_metric(csv_path, metric_name)
 
         for matrix_id, values in method_values.items():
             aggregated[matrix_id].extend(values)
 
-    # Output CSV
-    output_path = output_dir / filename
+    # Create metric output directory
+    metric_output_dir = output_dir / metric_name
+    metric_output_dir.mkdir(parents=True, exist_ok=True)
+
+    output_path = metric_output_dir / filename
 
     with open(output_path, "w", newline="") as f:
         writer = csv.writer(f)
 
         writer.writerow([
             "matrix_id",
-            "mean_kernel_gflops",
-            "min_kernel_gflops",
-            "max_kernel_gflops",
-            "mse_kernel_gflops",
-            "stddev_kernel_gflops",
+            f"mean_{metric_name}",
+            f"min_{metric_name}",
+            f"max_{metric_name}",
+            f"mse_{metric_name}",
+            f"stddev_{metric_name}",
         ])
 
         for matrix_id in sorted(aggregated.keys()):
@@ -106,11 +108,11 @@ def process_method(data_dir, output_dir, filename):
 
             writer.writerow([
                 matrix_id,
-                f"{stats['mean']:.3f}",
-                f"{stats['min']:.3f}",
-                f"{stats['max']:.3f}",
-                f"{stats['mse']:.3f}",
-                f"{stats['stddev']:.3f}",
+                f"{stats['mean']:.6f}",
+                f"{stats['min']:.6f}",
+                f"{stats['max']:.6f}",
+                f"{stats['mse']:.6f}",
+                f"{stats['stddev']:.6f}",
             ])
 
     print(f"Generated: {output_path}")
@@ -138,8 +140,14 @@ def main():
 
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    for filename in CSV_FILES:
-        process_method(data_dir, output_dir, filename)
+    for metric_name in METRICS:
+        for filename in CSV_FILES:
+            process_method(
+                data_dir,
+                output_dir,
+                filename,
+                metric_name
+            )
 
 
 if __name__ == "__main__":
