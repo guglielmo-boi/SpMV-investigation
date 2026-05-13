@@ -118,6 +118,63 @@ def process_method(data_dir, output_dir, filename, metric_name):
     print(f"Generated: {output_path}")
 
 
+def print_kernel_execution_speedups(output_dir):
+    """
+    Prints speedups relative to cuSPARSE using:
+        speedup = cusparse_time / method_time
+    """
+
+    metric_dir = output_dir / "kernel_execution_time"
+
+    methods = {
+        "CSR-Vector": "csr_vector.csv",
+        "CSR-Stream": "csr_stream.csv",
+        "CSR-Adaptive": "csr_adaptive.csv",
+    }
+
+    cusparse_file = metric_dir / "cusparse.csv"
+
+    # Read cuSPARSE means
+    cusparse_times = {}
+
+    with open(cusparse_file, "r", newline="") as f:
+        reader = csv.DictReader(f)
+
+        for row in reader:
+            matrix_id = row["matrix_id"]
+            mean_time = float(row["mean_kernel_execution_time"])
+
+            cusparse_times[matrix_id] = mean_time
+
+    print("\n=== Kernel Execution Time Speedups (vs cuSPARSE) ===\n")
+
+    for method_name, filename in methods.items():
+        print(f"{method_name}:")
+
+        method_file = metric_dir / filename
+
+        with open(method_file, "r", newline="") as f:
+            reader = csv.DictReader(f)
+
+            for row in reader:
+                matrix_id = row["matrix_id"]
+
+                method_time = float(
+                    row["mean_kernel_execution_time"]
+                )
+
+                cusparse_time = cusparse_times[matrix_id]
+
+                speedup = cusparse_time / method_time
+
+                print(
+                    f"  {matrix_id:15s} "
+                    f"{speedup:.3f}x"
+                )
+
+        print()
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Aggregate SpMV benchmark CSV files."
@@ -149,6 +206,7 @@ def main():
                 metric_name
             )
 
+    print_kernel_execution_speedups(output_dir)
 
 if __name__ == "__main__":
     main()

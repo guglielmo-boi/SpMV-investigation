@@ -9,9 +9,8 @@
 #SBATCH --time=02:00:00
 
 #SBATCH --job-name=spmv-benchmark
-#SBATCH --array=1-2
-#SBATCH --output=spmv-benchmark-%A_%a.out
-#SBATCH --error=spmv-benchmark-%A_%a.err
+#SBATCH --output=spmv-benchmark-%j.out
+#SBATCH --error=spmv-benchmark-%j.err
 
 module load CUDA/12.1.1
 
