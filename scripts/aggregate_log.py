@@ -40,7 +40,7 @@ def read_metric(csv_path, metric_name):
                 kernel_time = float(row["kernel_execution_time"])
 
                 metric_value = (
-                    (total_time - kernel_time) / total_time
+                    (total_time - kernel_time) / total_time * 100.0
                 )
 
             else:
