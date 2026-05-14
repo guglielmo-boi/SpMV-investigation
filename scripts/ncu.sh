@@ -9,18 +9,32 @@
 #SBATCH --time=02:00:00
 
 #SBATCH --job-name=spmv-ncu
-#SBATCH --output=spmv-ncu-%j.out
-#SBATCH --error=spmv-ncu-%j.err
+#SBATCH --array=1-10
+#SBATCH --output=spmv-ncu-%A_%a.out
+#SBATCH --error=spmv-ncu-%A_%a.err
 
 module load CUDA/12.1.1
 
-export TMPDIR=$HOME/tmp/$SLURM_JOB_ID
+export TMPDIR=$HOME/tmp/${SLURM_JOB_ID}_${SLURM_ARRAY_TASK_ID}
 mkdir -p $TMPDIR
 
+REPORT_NAME=ncu-report-${SLURM_ARRAY_JOB_ID}_${SLURM_ARRAY_TASK_ID}
+
 ncu \
-    --set speedOfLight \
     --target-processes all \
-    --export ncu-report-${SLURM_ARRAY_TASK_ID} \
+    --metrics \
+        dram__bytes.sum,\
+        dram__throughput.avg.pct_of_peak_sustained_elapsed,\
+        l1tex__t_bytes.sum,\
+        lts__t_bytes.sum,\
+        sm__throughput.avg.pct_of_peak_sustained_elapsed \
+    --export ${REPORT_NAME} \
     ./bin/spmv \
     /home/guglielmo.boi/spmv-investigation/data \
     /home/guglielmo.boi/spmv-investigation/log
+
+ncu \
+    --import ${REPORT_NAME}.ncu-rep \
+    --page details \
+    --csv \
+    > ${REPORT_NAME}.csv 2>&1

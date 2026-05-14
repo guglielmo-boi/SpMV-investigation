@@ -7,8 +7,8 @@ CudaEventChrono::CudaEventChrono() {
 }
 
 CudaEventChrono::~CudaEventChrono() {
-    cudaEventDestroy(start);
-    cudaEventDestroy(stop);
+    cudaEventDestroy(this->start);
+    cudaEventDestroy(this->stop);
 }
 
 float CudaEventChrono::measure_elapsed_milliseconds() {

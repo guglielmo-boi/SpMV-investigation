@@ -19,6 +19,7 @@ METRICS = [
     "kernel_execution_time",
     "total_gflops",
     "kernel_gflops",
+    "preprocessing_time_percentage",
 ]
 
 
@@ -33,7 +34,17 @@ def read_metric(csv_path, metric_name):
 
         for row in reader:
             matrix_id = row["matrix_id"]
-            metric_value = float(row[metric_name])
+
+            if metric_name == "preprocessing_time_percentage":
+                total_time = float(row["total_execution_time"])
+                kernel_time = float(row["kernel_execution_time"])
+
+                metric_value = (
+                    (total_time - kernel_time) / total_time
+                )
+
+            else:
+                metric_value = float(row[metric_name])
 
             values[matrix_id].append(metric_value)
 
