@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+# This code was created with the help of generative artificial intelligence.
+
 import argparse
 import csv
 import math

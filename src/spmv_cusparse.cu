@@ -2,6 +2,8 @@
 
 #include <cusparse.h>
 
+// This code was created with the help of generative artificial intelligence.
+
 Metrics spmv_cusparse(const CsrMatrix& A, const DenseVector& x, DenseVector& y) {
     Metrics metrics;
     CudaEventChrono cusparse_chrono;
