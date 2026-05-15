@@ -11,7 +11,7 @@ Metrics spmv_csr_adaptive(const CsrMatrix& A, const DenseVector& x, DenseVector&
     int threshold = WARP_SIZE;
 
     for (int i = 0; i < A.rows; ++i) {
-        int row_len = A.row_ptr[i+1] - A.row_ptr[i];
+        int row_len = A.row_ptr[i + 1] - A.row_ptr[i];
 
         if (row_len >= threshold) {
             long_rows.push_back(i);

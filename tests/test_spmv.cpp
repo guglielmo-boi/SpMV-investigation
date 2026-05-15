@@ -11,12 +11,12 @@
 #include <vector>
 #include <string>
 
-namespace fs = std::filesystem;
+// This code was created with the help of generative artificial intelligence.
 
 std::vector<std::string> get_mtx_files(const std::string& data_dir) {
     std::vector<std::string> files;
 
-    for (const auto& entry : fs::directory_iterator(data_dir)) {
+    for (const auto& entry : std::filesystem::directory_iterator(data_dir)) {
         if (entry.path().extension() == ".mtx") {
             files.push_back(entry.path().string());
         }

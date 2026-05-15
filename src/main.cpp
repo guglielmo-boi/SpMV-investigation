@@ -12,6 +12,8 @@
 #include <vector>
 #include <string>
 
+// This code was created with the help of generative artificial intelligence.
+
 std::vector<std::filesystem::path> get_matrix_files(const std::filesystem::path& data_dir) {
     std::vector<std::filesystem::path> files;
 
