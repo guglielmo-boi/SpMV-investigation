@@ -27,8 +27,8 @@ bool DenseVector::is_close(const DenseVector& other, dtype epsilon) const {
     }
 
     for (int i = 0; i < this->size(); ++i) {
-        float a = this->operator[](i);
-        float b = other[i];
+        float a = static_cast<float>(this->operator[](i));
+        float b = static_cast<float>(other[i]);
 
         float abs_error = std::fabs(a - b);
         float denom = std::fmaxf(std::fabs(a), std::fabs(b));

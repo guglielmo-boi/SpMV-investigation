@@ -1,5 +1,6 @@
 #!/bin/bash
 #SBATCH --partition=edu-medium
+#SBATCH --nodelist=edu01
 #SBATCH --account=gpu.computing26
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
