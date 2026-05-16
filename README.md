@@ -10,16 +10,9 @@ This project investigates different GPU implementations of Sparse Matrix-Vector 
 The project evaluates kernel execution time, GFLOPS, memory traffic, Streaming Multiprocessor throughput, and bandwidth utilization across several sparse matrices from the SuiteSparse collection. To reproduce the results download the following matrices in the data folder (.mtx format).
 
 ## Dataset
-ASIC_680ks
-FullChip
-Ga41As41H72
-Rucci1
-Si41Ge41H72
-boyd2
-eu-2005
-ldoor
-rajat31
-webbase-1M
+```text
+ASIC_680ks FullChip Ga41As41H72 Rucci1 Si41Ge41H72 boyd2 eu-2005 ldoor rajat31 webbase-1M
+```
 
 ## Build
 
@@ -40,15 +33,20 @@ sbatch ./scripts/benchmark.sh
 sbatch ./scripts/test.sh
 ```
 
+## Run NVIDIA Nsight Compute
+```bash
+sbatch ./scripts/ncu.sh
+```
+
 ## Repository Structure
 
 ```text
 include/      Header files
 src/          Source code
-tests/        SpMV implementations tests
+tests/        SpMV implementation tests
 scripts/      SLURM and Python scripts
 data/         Sparse matrices dataset
-results/      Benchmark outputs
+results/      Benchmark results
 log/          Benchmark logs
 references/   Papers and reference material
 external/     External dependencies
