@@ -7,7 +7,19 @@ This project investigates different GPU implementations of Sparse Matrix-Vector 
 * CSR-Adaptive
 * cuSPARSE (baseline)
 
-The project evaluates kernel execution time, GFLOPS, memory traffic, Streaming Multiprocessor throughput, and bandwidth utilization across several sparse matrices from the SuiteSparse collection.
+The project evaluates kernel execution time, GFLOPS, memory traffic, Streaming Multiprocessor throughput, and bandwidth utilization across several sparse matrices from the SuiteSparse collection. To reproduce the results download the following matrices in the data folder (.mtx format).
+
+## Dataset
+ASIC_680ks
+FullChip
+Ga41As41H72
+Rucci1
+Si41Ge41H72
+boyd2
+eu-2005
+ldoor
+rajat31
+webbase-1M
 
 ## Build
 
@@ -35,9 +47,9 @@ include/      Header files
 src/          Source code
 tests/        SpMV implementations tests
 scripts/      SLURM and Python scripts
-data/         Sparse matrix datasets (mtx format)
+data/         Sparse matrices dataset
 results/      Benchmark outputs
-log/          Execution logs
+log/          Benchmark logs
 references/   Papers and reference material
 external/     External dependencies
 ```
