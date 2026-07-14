@@ -7,10 +7,11 @@
 *.err
 *.out
 
-/bin
-/build
-/data
-/log
-
 /.vscode
 /.venv
+
+/bin
+/build
+
+/data/**
+/log/**
