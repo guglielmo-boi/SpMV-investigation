@@ -12,6 +12,5 @@
 
 /bin
 /build
-
-/data/**
-/log/**
+/data
+/log
