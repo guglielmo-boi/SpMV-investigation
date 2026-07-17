@@ -14,4 +14,4 @@
 
 module load CUDA/12.1.1
 
-./bin/spmv /home/guglielmo.boi/spmv-investigation/data /home/guglielmo.boi/spmv-investigation/log
+./bin/spmv $SLURM_SUBMIT_DIR/data $SLURM_SUBMIT_DIR/log

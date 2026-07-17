@@ -30,8 +30,8 @@ ncu \
         sm__throughput.avg.pct_of_peak_sustained_elapsed \
     --export ${REPORT_NAME} \
     ./bin/spmv \
-    /home/guglielmo.boi/spmv-investigation/data \
-    /home/guglielmo.boi/spmv-investigation/log
+    $SLURM_SUBMIT_DIR/data \
+    $SLURM_SUBMIT_DIR/log
 
 ncu \
     --import ${REPORT_NAME}.ncu-rep \
