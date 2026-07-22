@@ -9,6 +9,11 @@ MtxParser::MtxMatrix MtxParser::parseMtxFile(const std::string& file_path) {
 
     std::ifstream ifs(file_path);
 
+    if (ifs.fail()) {
+        std::cerr << "Unable to open file: " << file_path << std::endl;
+        return ret;
+    }
+
     std::string line;
     bool parsed_first_line = false;
 
