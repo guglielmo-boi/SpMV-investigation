@@ -16,6 +16,6 @@ module load CUDA/12.1.1
 
 set -e
 
-cd $SLURM_SUBMIT_DIR/build
+cd "${SLURM_SUBMIT_DIR}/build"
 
 ctest --output-on-failure

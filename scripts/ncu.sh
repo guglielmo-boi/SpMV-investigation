@@ -9,9 +9,8 @@
 #SBATCH --time=02:00:00
 
 #SBATCH --job-name=spmv-ncu
-#SBATCH --array=1-10
-#SBATCH --output=spmv-ncu-%A_%a.out
-#SBATCH --error=spmv-ncu-%A_%a.err
+#SBATCH --output=spmv-ncu-%j.out
+#SBATCH --error=spmv-ncu-%j.err
 
 module load CUDA/12.1.1
 
@@ -29,7 +28,7 @@ ncu \
         lts__t_bytes.sum,\
         sm__throughput.avg.pct_of_peak_sustained_elapsed \
     --export ${REPORT_NAME} \
-    ./bin/spmv \
+    $SLURM_SUBMIT_DIR/bin/spmv \
     $SLURM_SUBMIT_DIR/data \
     $SLURM_SUBMIT_DIR/log
 

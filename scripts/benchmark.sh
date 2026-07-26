@@ -14,4 +14,6 @@
 
 module load CUDA/12.1.1
 
-./bin/spmv $SLURM_SUBMIT_DIR/data $SLURM_SUBMIT_DIR/log
+mkdir -p "${SLURM_SUBMIT_DIR}/log"
+
+"${SLURM_SUBMIT_DIR}/bin/spmv" "${SLURM_SUBMIT_DIR}/data" "${SLURM_SUBMIT_DIR}/log"
