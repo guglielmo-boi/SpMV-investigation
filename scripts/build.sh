@@ -17,8 +17,6 @@ module load CUDA/12.1.1
 BUILD_DIR="${SLURM_SUBMIT_DIR}/build"
 BIN_DIR="${SLURM_SUBMIT_DIR}/bin"
 
-echo "=== Starting Build Process ==="
-
 rm -rf "${BUILD_DIR}" "${BIN_DIR}"
 mkdir -p "${BUILD_DIR}"
 cmake -B "${BUILD_DIR}" -DCMAKE_BUILD_TYPE=Release
@@ -28,5 +26,3 @@ if [ $? -ne 0 ]; then
     echo "Error: Compilation failed. Exiting job."
     exit 1
 fi
-
-echo "=== Build Completed Successfully ==="
